@@ -18,35 +18,115 @@
 // solution 함수에서는 로그 데이터 lines 배열에 대해 초당 최대 처리량을 리턴한다.
 
 function solution(lines) {
-	var parsed = lines.map((log) => {
-		var [date, time, duration] = log.split(" ");
+  var times = lines.map((log) => {
+    var date = log.substring(0, 23);
+    var duration = Number.parseFloat(log.slice(24, -1)) * 1000;
+    var end = Date.parse(date);
+    var start = end - duration + 1;
 
-		duration = parseFloat(duration.replace("s", ""));
-		var end = new Date(`${date} ${time}`).valueOf();
+    return {
+      start,
+      end,
+    };
+  });
 
-		return {
-			end,
-			duration,
-		};
-	});
+  var result = 0;
+  for (var i = 0; i < times.length; i++) {
+    // 현재 시간대 포함
+    var startSize = (endSize = 1);
 
-	var results = [];
-	for (let i = 0; i < parsed.length; i++) {
-		var source = parsed[i];
-		results[i] =
-			parsed.filter(
-				(target) =>
-					// 이후것만 확인
-					target.end > source.end &&
-					// 소스의 끝을 기준으로 1초 이내에 타겟의 시작과 끝 사이인지 확인
-					target.end - target.duration * 1000 + 1 < source.end + 1000
-			).length + 1; // 현재 진행중 포함
-	}
+    for (var j = i + 1; j < times.length; j++) {
+      var countUp = false;
 
-	//최대값 확인
-	return Math.max(...Object.values(results));
+	  var targetStart = times[j].start;
+	  var targetEnd = times[j].end;
+
+      // 시작시간 기준 1초 내,
+      if (times[i].start + 1000 > times[j].start) {
+        startSize++;
+        countUp = true;
+      }
+      // 종료시간 기준 1초 내,
+      if (times[i].end + 1000 > times[j].start) {
+        countUp = true;
+        endSize++;
+      }
+      if (!countUp) break;
+    }
+
+    //최대값 확인
+    result = Math.max(result, Math.max(startSize, endSize));
+  }
+
+  return result;
+}
+
+function solution2(lines) {
+  var result = 0;
+  // hashmap
+  var times = {};
+  for (var i = 0; i < lines.length; i++) {
+    // 현재 시간대 포함
+    var startSize = (endSize = 1);
+    if (!times[i]) {
+      var currentDate = lines[i].substring(0, 23);
+      var currentDuration = Number.parseFloat(lines[i].slice(24, -1)) * 1000;
+
+      var currentEndTime = Date.parse(currentDate);
+      var currentStartTime = currentEndTime - currentDuration + 1;
+      times[i] = {
+        startTime: currentStartTime,
+        endTime: currentEndTime,
+      };
+    }
+
+    for (var j = i + 1; j < lines.length; j++) {
+      var countUp = false;
+
+      if (!times[j]) {
+        var targetDate = lines[j].substring(0, 23);
+        var targetDuration = Number.parseFloat(lines[j].slice(24, -1)) * 1000;
+
+        var targetEndTime = Date.parse(targetDate);
+        var targetStartTime = targetEndTime - targetDuration + 1;
+        times[j] = {
+          startTime: targetStartTime,
+          endTime: targetEndTime,
+        };
+      }
+
+      // 시작시간 기준 1초 내,
+      if (times[j].startTime < times[i].startTime + 1000) {
+        startSize++;
+        countUp = true;
+      }
+      // 종료시간 기준 1초 내,
+      if (times[j].startTime < times[i].endTime + 1000) {
+        countUp = true;
+        endSize++;
+      }
+      if (!countUp) break;
+    }
+
+    //최대값 확인
+    result = Math.max(result, Math.max(startSize, endSize));
+  }
+
+  return result;
 }
 
 console.log(
-	solution(["2016-09-15 01:00:04.001 2.0s", "2016-09-15 01:00:07.000 2s"])
+  //   solution(['2016-09-15 01:00:04.002 2.0s', '2016-09-15 01:00:07.000 2s'])
+  solution([
+    '2016-09-15 20:59:57.421 0.351s',
+    '2016-09-15 20:59:58.233 1.181s',
+    '2016-09-15 20:59:58.299 0.8s',
+    '2016-09-15 20:59:58.688 1.041s',
+    '2016-09-15 20:59:59.591 1.412s',
+    '2016-09-15 21:00:00.464 1.466s',
+    '2016-09-15 21:00:00.741 1.581s',
+    '2016-09-15 21:00:00.748 2.31s',
+    '2016-09-15 21:00:00.966 0.381s',
+    '2016-09-15 21:00:02.066 2.62s',
+  ])
 );
