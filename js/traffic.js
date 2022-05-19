@@ -18,11 +18,14 @@
 // solution 함수에서는 로그 데이터 lines 배열에 대해 초당 최대 처리량을 리턴한다.
 
 function solution(lines) {
-  var times = lines.map((log) => {
-    var date = log.substring(0, 23);
-    var duration = Number.parseFloat(log.slice(24, -1)) * 1000;
-    var end = Date.parse(date);
-    var start = end - duration + 1;
+  const times = [];
+  const logs = lines.map((log) => {
+    const date = log.substring(0, 23);
+    const duration = Number.parseFloat(log.slice(24, -1)) * 1000;
+    const end = Date.parse(date);
+    const start = end - duration + 1;
+
+    times.push(start, end);
 
     return {
       start,
@@ -30,91 +33,26 @@ function solution(lines) {
     };
   });
 
-  var result = 0;
-  for (var i = 0; i < times.length; i++) {
-    // 현재 시간대 포함
-    var startSize = (endSize = 1);
+  let result = 0;
 
-    for (var j = i + 1; j < times.length; j++) {
-      var countUp = false;
-
-	  var targetStart = times[j].start;
-	  var targetEnd = times[j].end;
-
-      // 시작시간 기준 1초 내,
-      if (times[i].start + 1000 > times[j].start) {
-        startSize++;
-        countUp = true;
-      }
-      // 종료시간 기준 1초 내,
-      if (times[i].end + 1000 > times[j].start) {
-        countUp = true;
-        endSize++;
-      }
-      if (!countUp) break;
-    }
+  for (let i = 0; i < times.length; i++) {
+    const startWin = times[i];
+    const endWin = startWin + 999;
 
     //최대값 확인
-    result = Math.max(result, Math.max(startSize, endSize));
+    result = Math.max(
+      result,
+      logs.filter(
+        (log) =>
+          (log.start >= startWin && log.start <= endWin) ||
+          (log.end >= startWin && log.end <= endWin) ||
+          (log.start <= startWin && log.end >= endWin)
+      ).length
+    );
   }
 
   return result;
 }
-
-function solution2(lines) {
-  var result = 0;
-  // hashmap
-  var times = {};
-  for (var i = 0; i < lines.length; i++) {
-    // 현재 시간대 포함
-    var startSize = (endSize = 1);
-    if (!times[i]) {
-      var currentDate = lines[i].substring(0, 23);
-      var currentDuration = Number.parseFloat(lines[i].slice(24, -1)) * 1000;
-
-      var currentEndTime = Date.parse(currentDate);
-      var currentStartTime = currentEndTime - currentDuration + 1;
-      times[i] = {
-        startTime: currentStartTime,
-        endTime: currentEndTime,
-      };
-    }
-
-    for (var j = i + 1; j < lines.length; j++) {
-      var countUp = false;
-
-      if (!times[j]) {
-        var targetDate = lines[j].substring(0, 23);
-        var targetDuration = Number.parseFloat(lines[j].slice(24, -1)) * 1000;
-
-        var targetEndTime = Date.parse(targetDate);
-        var targetStartTime = targetEndTime - targetDuration + 1;
-        times[j] = {
-          startTime: targetStartTime,
-          endTime: targetEndTime,
-        };
-      }
-
-      // 시작시간 기준 1초 내,
-      if (times[j].startTime < times[i].startTime + 1000) {
-        startSize++;
-        countUp = true;
-      }
-      // 종료시간 기준 1초 내,
-      if (times[j].startTime < times[i].endTime + 1000) {
-        countUp = true;
-        endSize++;
-      }
-      if (!countUp) break;
-    }
-
-    //최대값 확인
-    result = Math.max(result, Math.max(startSize, endSize));
-  }
-
-  return result;
-}
-
 console.log(
   //   solution(['2016-09-15 01:00:04.002 2.0s', '2016-09-15 01:00:07.000 2s'])
   solution([
