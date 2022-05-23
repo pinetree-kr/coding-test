@@ -19,42 +19,35 @@
 
 function solution(lines) {
   const times = [];
+
   const logs = lines.map((log) => {
     const date = log.substring(0, 23);
     const duration = Number.parseFloat(log.slice(24, -1)) * 1000;
-    const end = Date.parse(date);
-    const start = end - duration + 1;
-
-    times.push(start, end);
-
+    const endTime = Date.parse(date);
+    const startTime = endTime - duration + 1;
     return {
-      start,
-      end,
+      startTime,
+      endTime,
     };
   });
 
   let result = 0;
 
-  for (let i = 0; i < times.length; i++) {
-    const startWin = times[i];
-    const endWin = startWin + 999;
+  for (let i = 0; i < logs.length - result; i++) {
+    const currentLog = logs[i];
+    const endWin = currentLog.endTime + 1000;
 
-    //최대값 확인
-    result = Math.max(
-      result,
-      logs.filter(
-        (log) =>
-          (log.start >= startWin && log.start <= endWin) ||
-          (log.end >= startWin && log.end <= endWin) ||
-          (log.start <= startWin && log.end >= endWin)
-      ).length
-    );
+    const nums = logs.slice(i).filter((log) => log.startTime < endWin).length;
+    if (nums > result) {
+      result = nums;
+    }
   }
 
   return result;
 }
 console.log(
-  //   solution(['2016-09-15 01:00:04.002 2.0s', '2016-09-15 01:00:07.000 2s'])
+  solution(['2016-09-15 00:00:00.000 3s']),
+  solution(['2016-09-15 01:00:04.002 2.0s', '2016-09-15 01:00:07.000 2s']),
   solution([
     '2016-09-15 20:59:57.421 0.351s',
     '2016-09-15 20:59:58.233 1.181s',
