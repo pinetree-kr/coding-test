@@ -12,58 +12,123 @@
 // key와 lock의 원소는 0 또는 1로 이루어져 있습니다.
 // 0은 홈 부분, 1은 돌기 부분을 나타냅니다.
 
-function solution(key, lock) {
-  const coord = {
-    x0: -1,
-    y0: -1,
-    x1: -1,
-    y1: -1,
-  };
-  for (let i = 0; i < lock.length; i++) {
-    const first = lock[i].indexOf(0);
-    const last = lock[i].lastIndexOf(0);
-    if (first >= 0) {
-      if (coord.x0 == -1) {
-        coord.x0 = coord.x1 = first;
-      } else {
-        if (coord.x0 > first) {
-          coord.x0 = first;
-        } else if (coord.x1 < last) {
-          coord.x1 = last;
-        }
-      }
+const cosX = 0;
+const sinX = -1;
 
-      if (coord.y0 == -1) {
-        coord.y0 = coord.y1 = i;
-      } else {
-        if (coord.y0 < i) {
-          coord.y1 = i;
-        }
-      }
-    }
-  }
-  console.log(coord);
-  // const flatted = lock.flat();
+// const cosX = Math.round(Math.cos(-Math.PI / 2));
+// const sinX = Math.round(Math.sin(-Math.PI / 2));
 
-  // flatted
-  //   .filter((o) => !o)
-  //   .forEach((o) => {
-  //     console.log(flatted.indexOf(o));
-  //   });
-  // console.log(lock.flat());
-  return 1;
+function rotXY(point) {
+	const ret = {
+		row: undefined,
+		col: undefined,
+	};
+
+	ret.row = (point.row - 1) * cosX - (point.col - 1) * sinX + 1;
+	ret.col = (point.row - 1) * sinX + (point.col - 1) * cosX + 1;
+
+	return ret;
 }
+function solution(key, lock) {
+	const coord = {
+		x0: -1,
+		y0: -1,
+		x1: -1,
+		y1: -1,
+	};
+	for (let i = 0; i < lock.length; i++) {
+		const first = lock[i].indexOf(0);
+		const last = lock[i].lastIndexOf(0);
+		if (first >= 0) {
+			if (coord.row0 == -1) {
+				coord.row0 = coord.row1 = first;
+			} else {
+				if (coord.row0 > first) {
+					coord.row0 = first;
+				} else if (coord.row1 < last) {
+					coord.row1 = last;
+				}
+			}
+
+			if (coord.col0 == -1) {
+				coord.col0 = coord.col1 = i;
+			} else {
+				if (coord.col0 < i) {
+					coord.col1 = i;
+				}
+			}
+		}
+	}
+	window = {
+		x: coord.row0,
+		y: coord.col0,
+		width: coord.row1 - coord.row0 + 1,
+		height: coord.col1 - coord.col0 + 1,
+	};
+
+	console.log(window);
+	// const flatted = lock.flat();
+
+	// flatted
+	//   .filter((o) => !o)
+	//   .forEach((o) => {
+	//     console.log(flatted.indexOf(o));
+	//   });
+	// console.log(lock.flat());
+	return 1;
+}
+// console.log(
+// 	solution(
+// 		[
+// 			[0, 0, 0],
+// 			[1, 0, 0],
+// 			[0, 1, 1],
+// 		],
+// 		[
+// 			[1, 0, 1],
+// 			[1, 1, 0],
+// 			[1, 0, 1],
+// 		]
+// 	)
+// );
+
+// [0 1 0]
+// [1 0 0]
+// [1 0 0]
+
+// 0,0 = 0,2
+// 1,0 = 1,1
+// x = y
+// y = -x + 2
+
+function rotateXY(x, y, origin) {
+	return {
+		x: (x - origin) * cosX - (y - origin) * sinX + origin,
+		y: (x - origin) * sinX + (y - origin) * cosX + origin,
+	};
+}
+
+// 우리가 생각하는거랑 다른 좌표임... y가 내려감
+
+function rotate(matrix) {
+	const new_matrix = Array(matrix.length).fill(Array(matrix.length).fill(0));
+	// idxRow
+	// idxColumn
+	for (let idxRow = 0; idxRow < matrix.length; idxRow++) {
+		for (let idxColumn = 0; idxColumn < matrix.length; idxColumn++) {
+			console.log(`before (x,y): (${idxColumn}, ${idxRow})`);
+			const {x, y} = rotateXY(idxColumn, idxRow, Math.floor(matrix.length / 2));
+			console.log(`after (x,y): (${x}, ${y})\n`);
+		}
+	}
+
+	return new_matrix;
+}
+
 console.log(
-  solution(
-    [
-      [0, 0, 0],
-      [1, 0, 0],
-      [0, 1, 1],
-    ],
-    [
-      [1, 1, 1],
-      [1, 1, 0],
-      [1, 1, 1],
-    ]
-  )
+	rotate([
+		[0, 0, 0],
+		[1, 0, 0],
+		[0, 1, 1],
+	])
 );
